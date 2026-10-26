@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabrika Çarkları: EBOB & EKOK Fabrikası</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Gear animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 12s linear infinite;
+        }
+        .animate-spin-reverse {
+            animation: spin 15s linear infinite reverse;
+        }
+        /* Custom Industrial Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="text-amber-400 text-2xl animate-spin-slow">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                    <h1 class="font-orbitron text-lg md:text-xl font-bold tracking-wider text-amber-400">FABRİKA ÇARKLARI</h1>
+                    <p class="text-xs text-slate-400">EBOB & EKOK Mühendislik Simülasyonu</p>
+                </div>
+            </div>
+            <div id="header-stats" class="hidden flex items-center space-x-4 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                <div>
+                    <span class="text-xs text-slate-400 block">TAKIM:</span>
+                    <span id="stat-team-name" class="font-bold text-amber-300">--</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div>
+                    <span class="text-xs text-slate-400 block">PUAN:</span>
+                    <span id="stat-score" class="font-bold text-emerald-400 text-lg">0</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div>
+                    <span class="text-xs text-slate-400 block">GÖREV:</span>
+                    <span id="stat-progress" class="font-bold text-cyan-400">1 / 10</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center items-center">
+
+        <!-- 1. GİRİŞ EKRANI -->
+        <div id="screen-welcome" class="w-full bg-slate-800/90 border border-slate-700 rounded-2xl p-6 md:p-10 shadow-2xl text-center relative overflow-hidden backdrop-blur-md">
+            <!-- Background decorative industrial shapes -->
+            <div class="absolute -right-10 -bottom-10 text-slate-700/30 text-9xl pointer-events-none">
+                <i class="fa-solid fa-industry"></i>
+            </div>
+
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-3xl mb-6 animate-pulse">
+                <i class="fa-solid fa-gears"></i>
+            </div>
+
+            <h2 class="font-orbitron text-2xl md:text-4xl font-bold text-white mb-3">EBOB & EKOK Fabrikası'na Hoş Geldiniz!</h2>
+            <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-8">
+                Şehrin ana enerji çarkları durmak üzere! Fabrika mühendisi olarak görevi devralın; ortak kat ve ortak bölen bulmaca görevlerini çözerek çarkları yeniden çalıştırın!
+            </p>
+
+            <div class="max-w-md mx-auto bg-slate-900/60 p-5 rounded-xl border border-slate-700 mb-8 text-left">
+                <label for="team-name-input" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Mühendislik Takım Adı:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="team-name-input" placeholder="Örn: Yıldız Mühendisler" class="flex-grow bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400 text-sm md:text-base" maxlength="25">
+                    <button onclick="startGame()" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <span>Başla</span>
+                        <i class="fa-solid fa-play text-xs"></i>
+                    </button>
+                </div>
+                <p id="name-error" class="text-rose-400 text-xs mt-2 hidden">Lütfen geçerli bir takım adı giriniz!</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 text-center border-t border-slate-700/60 pt-6">
+                <div>
+                    <div class="text-amber-400 font-bold text-xl font-orbitron">10</div>
+                    <div class="text-xs text-slate-400">Üretim Görevi</div>
+                </div>
+                <div>
+                    <div class="text-cyan-400 font-bold text-xl font-orbitron">EBOB / EKOK</div>
+                    <div class="text-xs text-slate-400">Algoritmalar</div>
+                </div>
+                <div>
+                    <div class="text-emerald-400 font-bold text-xl font-orbitron">100 Puan</div>
+                    <div class="text-xs text-slate-400">Baş Mühendis unvanı</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. OYUN / GÖREV EKRANI -->
+        <div id="screen-game" class="w-full hidden space-y-6">
+            
+            <!-- Çark Görsel Banner & Durum -->
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div class="absolute right-0 top-0 translate-x-8 -translate-y-8 opacity-10 text-amber-400 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-gear animate-spin-slow"></i>
+                </div>
+                
+                <div class="flex items-center space-x-4 z-10">
+                    <div class="w-16 h-16 bg-amber-500/20 border border-amber-500/40 rounded-2xl flex items-center justify-center text-amber-400 text-3xl shadow-inner">
+                        <i id="mission-type-icon" class="fa-solid fa-puzzle-piece"></i>
+                    </div>
+                    <div>
+                        <span id="mission-badge" class="inline-block px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-full mb-1">GÖREV #1</span>
+                        <h3 id="mission-title" class="font-orbitron text-xl font-bold text-white">Şişeleme Hattı Arızası</h3>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6 z-10">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">KAZANILACAK PUAN</span>
+                        <span id="mission-points-val" class="font-bold text-amber-400 text-xl font-orbitron">+10 Puan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Görev Kartı & Soru Alanı -->
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+                <div id="mission-scenario" class="text-slate-200 text-base md:text-lg leading-relaxed mb-6 bg-slate-900/50 p-5 rounded-xl border border-slate-700/50">
+                    <!-- Soru metni buraya dinamik gelecek -->
+                </div>
+
+                <!-- Cevap Formu -->
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                                <i class="fa-solid fa-calculator"></i>
+                            </span>
+                            <input type="number" id="user-answer" placeholder="Cevabınızı giriniz..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-12 pr-4 py-4 text-white text-lg focus:outline-none focus:border-amber-400 transition-colors">
+                        </div>
+                        <button onclick="submitAnswer()" id="submit-btn" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+                            <span>Çarkı Döndür</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- İpucu Butonu ve Alanı -->
+                    <div class="flex items-center justify-between pt-2">
+                        <button onclick="toggleHint()" class="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition-colors">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span id="hint-btn-text">Mühendislik İpucunu Göster</span>
+                        </button>
+                        <span class="text-xs text-slate-500">İpucu kullanmak skoru etkilemez.</span>
+                    </div>
+
+                    <div id="hint-box" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-200 text-sm animate-fadeIn">
+                        <div class="font-bold mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span>Çözüm Rehberi:</span>
+                        </div>
+                        <p id="hint-text">--</p>
+                    </div>
+                </div>
+
+                <!-- Geri Bildirim Alanı (Doğru/Yanlış) -->
+                <div id="feedback-box" class="mt-6 hidden rounded-xl p-5 border text-center animate-fadeIn">
+                    <div id="feedback-icon" class="text-3xl mb-2"></div>
+                    <h4 id="feedback-title" class="font-orbitron font-bold text-lg mb-1"></h4>
+                    <p id="feedback-msg" class="text-sm mb-4"></p>
+                    <button onclick="nextMission()" id="next-mission-btn" class="bg-white text-slate-900 font-bold px-6 py-2.5 rounded-lg shadow hover:bg-slate-100 transition-all">
+                        Sonraki Göreve Geç <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. SONUÇ / ÖZET EKRANI -->
+        <div id="screen-result" class="w-full hidden bg-slate-800/90 border border-slate-700 rounded-2xl p-6 md:p-10 shadow-2xl text-center backdrop-blur-md">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-full text-slate-900 text-4xl mb-6 shadow-xl animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <span id="result-badge" class="inline-block px-4 py-1.5 bg-amber-500/20 text-amber-300 font-bold text-sm rounded-full mb-3 border border-amber-500/30">BAŞ MÜHENDİS UNVANI KAZANILDI!</span>
+            <h3 class="font-orbitron text-2xl md:text-4xl font-bold text-white mb-2" id="result-title">Tebrikler Mühendisler!</h3>
+            <p class="text-slate-300 text-sm md:text-base max-w-md mx-auto mb-8" id="result-desc">
+                Fabrikanın tüm ana çarkları kusursuz bir şekilde eşleşti ve üretim hattı tekrar tam kapasite çalışmaya başladı.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-lg mx-auto mb-8">
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block mb-1">TOPLAM TAKIM SKORU</span>
+                    <span id="final-score" class="font-bold text-emerald-400 text-2xl font-orbitron">0</span>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block mb-1">DOĞRU ÇÖZÜMLER</span>
+                    <span id="final-correct" class="font-bold text-cyan-400 text-2xl font-orbitron">0 / 10</span>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+                    <span class="text-xs text-slate-400 block mb-1">BAŞARI DERECESİ</span>
+                    <span id="final-grade" class="font-bold text-amber-400 text-2xl font-orbitron">A+</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="restartGame()" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Fabrikayı Yeniden Başlat</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900/80 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p>Fabrika Çarkları: EBOB & EKOK Simülasyonu &bull; Ortaokul Matematik Öğrenme Oyunları</p>
+    </footer>
+
+    <script>
+        // Oyun Verileri ve Sorular (10 Özgün Görev)
+        const missions = [
+            {
+                id: 1,
+                title: "Şişeleme Hattı Arızası",
+                type: "EBOB",
+                icon: "fa-bottle-water",
+                scenario: "Fabrikaya sırasıyla <strong>24 litre</strong> ve <strong>36 litre</strong> kapasiteli iki farklı meyve suyu tankeri geldi. Bu sular birbirine karıştırılmadan, hiç artmayacak ve eşit hacimli şişelere doldurulacaktır. Kullanılacak bir şişenin hacmi en fazla kaç litre olabilir?",
+                answer: 12,
+                hint: "İki sayının ortak bölenlerinin en büyüğünü (EBOB) bulmalısınız. EBOB(24, 36) hesaplayın.",
+                solution: "EBOB(24, 36) = 12 litredir. Her iki miktar da 12'ye kalansız bölünebilir."
+            },
+            {
+                id: 2,
+                title: "Otomatik Alarm Sistemleri",
+                type: "EKOK",
+                icon: "fa-bell",
+                scenario: "Fabrikanın güvenlik uyarı alarmlarından biri <strong>12 dakikada bir</strong>, diğeri ise <strong>18 dakikada bir</strong> çalmaktadır. Bu iki alarm saat 08:00'de birlikte çaldıktan sonra, ilk kez kaç dakika sonra tekrar birlikte çalar?",
+                answer: 36,
+                hint: "Zamanların ortak katlarında tekrar buluşması için EKOK hesaplamalısınız. EKOK(12, 18).",
+                solution: "EKOK(12, 18) = 36 dakikadır. 36 dakika sonra alarmlar yeniden senkronize olur."
+            },
+            {
+                id: 3,
+                title: "Fayans ve Zemin Kaplama",
+                type: "EKOK",
+                icon: "fa-cubes",
+                scenario: "Fabrikanın depo zeminine boyutları <strong>40 cm</strong> ve <strong>60 cm</strong> olan dikdörtgen şeklindeki fayanslar yan yana ve üst üste dizilerek en küçük alanlı bir <strong>kare</strong> zemin oluşturulacaktır. Bu karenin bir kenarı kaç cm olmalıdır?",
+                answer: 120,
+                hint: "Fayansları birleştirerek kare oluşturmak küçük parçalardan büyük parça üretmektir; yani EKOK(40, 60) bulmalısınız.",
+                solution: "EKOK(40, 60) = 120 cm. Karenin bir kenarı 120 cm olmalıdır (3 sıra 40'lık, 2 sıra 60'lık)."
+            },
+            {
+                id: 4,
+                title: "Koli İstifleme Bölümü",
+                type: "EBOB",
+                icon: "fa-box-archive",
+                scenario: "Bir depoda <strong>45 adet</strong> mavi koli ve <strong>60 adet</strong> kırmızı koli bulunmaktadır. Bu koliler hiç artmayacak ve birbirine karıştırılmayacak şekilde eşit büyüklükteki raflara (gruplara) yerleştirilecektir. Bir rafta en fazla kaç koli bulunabilir?",
+                answer: 15,
+                hint: "Kolileri eşit gruplara ayırmak için ortak bölen bulmalısınız. EBOB(45, 60).",
+                solution: "EBOB(45, 60) = 15'tir. Her rafta en fazla 15 koli olabilir."
+            },
+            {
+                id: 5,
+                title: "Vardiya ve Nöbet Çarkı",
+                type: "EKOK",
+                icon: "fa-user-clock",
+                scenario: "Fabrikada çalışan iki teknisyenden biri her <strong>10 günde bir</strong>, diğeri ise her <strong>14 günde bir</strong> nöbet tutmaktadır. İkisi birlikte aynı gün nöbet tuttuktan en az kaç gün sonra tekrar aynı gün nöbet tutarlar?",
+                answer: 70,
+                hint: "Tekrarlayan buluşma süreleri için EKOK(10, 14) hesaplayın.",
+                solution: "EKOK(10, 14) = 70 gündür."
+            },
+            {
+                id: 6,
+                title: "Kumaş Kesim Ünitesi",
+                type: "EBOB",
+                icon: "fa-scissors",
+                scenario: "Elimizde uzunlukları <strong>72 cm</strong> ve <strong>96 cm</strong> olan iki farklı kumaş topu vardır. Bu kumaşlar hiç artmayacak şekilde eşit uzunlukta en büyük parçalara ayrılacaktır. Kesilen bir parça kumaşın uzunluğu kaç cm olmalıdır?",
+                answer: 24,
+                hint: "Parçalara ayırma ve en büyük parça ifadesi EBOB(72, 96) demektir.",
+                solution: "EBOB(72, 96) = 24 cm'dir."
+            },
+            {
+                id: 7,
+                title: "Çift Dişli Çark Devri",
+                type: "EKOK",
+                icon: "fa-gear",
+                scenario: "İki farklı çarktan biri tam turunu <strong>15 saniyede</strong>, diğeri ise <strong>25 saniyede</strong> tamamlamaktadır. Bu iki çark aynı anda dönmeye başladıktan kaç saniye sonra ilk kez tekrar aynı başlangıç konumunda yan yana gelirler?",
+                answer: 75,
+                hint: "Periyodik olarak aynı anda buluşma soruları EKOK(15, 25) ile çözülür.",
+                solution: "EKOK(15, 25) = 75 saniyedir."
+            },
+            {
+                id: 8,
+                title: "Çiçek ve Saksı Dağıtımı",
+                type: "EBOB",
+                icon: "fa-seedling",
+                scenario: "Bir fabrika bahçesine yerleştirilmek üzere <strong>54 gül</strong> ve <strong>72 papatya</strong> fide alınmıştır. Fideler eşit sayılarda saksılara dikilecektir ve her saksıda sadece bir tür çiçek olacaktır. Bir saksıda en fazla kaç çiçek bulunabilir?",
+                answer: 18,
+                hint: "Eşit gruplara ayırma işlemi için EBOB(54, 72) hesaplamalısınız.",
+                solution: "EBOB(54, 72) = 18 çiçek bulunur."
+            },
+            {
+                id: 9,
+                title: "Otobüs Hareket Merkezi",
+                type: "EKOK",
+                icon: "fa-bus",
+                scenario: "Fabrika personel servisi güzergahında iki otobüsten biri <strong>20 dakikada bir</strong>, diğeri <strong>30 dakikada bir</strong> hareket etmektedir. Sabah saat 07:00'de aynı anda hareket eden bu iki otobüs, gün içinde tekrar ilk kez saat kaçta birlikte hareket eder? (Sadece dakika cinsinden süreyi giriniz)",
+                answer: 60,
+                hint: "Birlikte hareket etme periyodu için EKOK(20, 30) bulmalısınız.",
+                solution: "EKOK(20, 30) = 60 dakika (1 saat) sonra tekrar birlikte kalkarlar."
+            },
+            {
+                id: 10,
+                title: "Asal Güvenlik Şifresi",
+                type: "EBOB",
+                icon: "fa-shield-halved",
+                scenario: "Ana bilgisayar şifresi için A = EBOB(60, 84) ve B = EKOK(4, 6) değerleri hesaplanmıştır. Bu iki değerin toplamı (A + B) kaçtır?",
+                answer: 24,
+                hint: "Önce EBOB(60, 84)'ü bulup A'ya eşitleyin, ardından EKOK(4, 6)'yı bulup B'ye eşitleyin ve toplayın.",
+                solution: "EBOB(60, 84) = 12 ve EKOK(4, 6) = 12'dir. Toplam = 12 + 12 = 24."
+            }
+        ];
+
+        let gameState = {
+            teamName: "",
+            currentMissionIndex: 0,
+            score: 0,
+            correctCount: 0,
+            isHintShown: false
+        };
+
+        // DOM Elementleri
+        const screenWelcome = document.getElementById("screen-welcome");
+        const screenGame = document.getElementById("screen-game");
+        const screenResult = document.getElementById("screen-result");
+        const headerStats = document.getElementById("header-stats");
+        const statTeamName = document.getElementById("stat-team-name");
+        const statScore = document.getElementById("stat-score");
+        const statProgress = document.getElementById("stat-progress");
+
+        const missionBadge = document.getElementById("mission-badge");
+        const missionTitle = document.getElementById("mission-title");
+        const missionTypeIcon = document.getElementById("mission-type-icon");
+        const missionScenario = document.getElementById("mission-scenario");
+        const missionPointsVal = document.getElementById("mission-points-val");
+        const userAnswer = document.getElementById("user-answer");
+        const submitBtn = document.getElementById("submit-btn");
+        const hintBox = document.getElementById("hint-box");
+        const hintText = document.getElementById("hint-text");
+        const hintBtnText = document.getElementById("hint-btn-text");
+        const feedbackBox = document.getElementById("feedback-box");
+        const feedbackIcon = document.getElementById("feedback-icon");
+        const feedbackTitle = document.getElementById("feedback-title");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        const nextMissionBtn = document.getElementById("next-mission-btn");
+
+        // Oyun Başlatma
+        function startGame() {
+            const nameInput = document.getElementById("team-name-input").value.trim();
+            const errorEl = document.getElementById("name-error");
+
+            if (!nameInput) {
+                errorEl.classList.remove("hidden");
+                return;
+            }
+            errorEl.classList.add("hidden");
+
+            gameState.teamName = nameInput;
+            gameState.currentMissionIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+
+            statTeamName.textContent = gameState.teamName;
+            statScore.textContent = gameState.score;
+
+            screenWelcome.classList.add("hidden");
+            screenResult.classList.add("hidden");
+            screenGame.classList.remove("hidden");
+            headerStats.classList.remove("hidden");
+
+            loadMission();
+        }
+
+        // Görev Yükleme
+        function loadMission() {
+            const mission = missions[gameState.currentMissionIndex];
+            
+            missionBadge.textContent = `GÖREV #${mission.id} (${mission.type})`;
+            missionTitle.textContent = mission.title;
+            missionScenario.innerHTML = mission.scenario;
+            missionTypeIcon.className = `fa-solid ${mission.icon}`;
+            
+            userAnswer.value = "";
+            userAnswer.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            
+            hintBox.classList.add("hidden");
+            gameState.isHintShown = false;
+            hintBtnText.textContent = "Mühendislik İpucunu Göster";
+            feedbackBox.classList.add("hidden");
+
+            statProgress.textContent = `${gameState.currentMissionIndex + 1} / ${missions.length}`;
+            userAnswer.focus();
+        }
+
+        // İpucu Göster/Gizle
+        function toggleHint() {
+            const mission = missions[gameState.currentMissionIndex];
+            if (hintBox.classList.contains("hidden")) {
+                hintText.textContent = mission.hint;
+                hintBox.classList.remove("hidden");
+                hintBtnText.textContent = "İpucunu Gizle";
+            } else {
+                hintBox.classList.add("hidden");
+                hintBtnText.textContent = "Mühendislik İpucunu Göster";
+            }
+        }
+
+        // Cevap Gönderme ve Kontrol Etme
+        function submitAnswer() {
+            const val = userAnswer.value.trim();
+            if (val === "") {
+                userAnswer.focus();
+                return;
+            }
+
+            const numericVal = parseFloat(val);
+            const mission = missions[gameState.currentMissionIndex];
+            const isCorrect = (numericVal === mission.answer);
+
+            userAnswer.disabled = true;
+            submitBtn.disabled = true;
+            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+            feedbackBox.classList.remove("hidden");
+
+            if (isCorrect) {
+                gameState.score += 10;
+                gameState.correctCount += 1;
+                statScore.textContent = gameState.score;
+
+                feedbackBox.className = "mt-6 rounded-xl p-5 border bg-emerald-950/60 border-emerald-600 text-emerald-200 animate-fadeIn";
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+                feedbackTitle.textContent = "ÇARK BAŞARIYLA DÖNDÜ! (+10 Puan)";
+                feedbackMsg.innerHTML = `Harika iş mühendis! Doğru cevap. <br><span class="text-xs text-emerald-300/80 mt-1 block">${mission.solution}</span>`;
+            } else {
+                feedbackBox.className = "mt-6 rounded-xl p-5 border bg-rose-950/60 border-rose-600 text-rose-200 animate-fadeIn";
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i>';
+                feedbackTitle.textContent = "SİSTEM HATASI / ÇARK KİLİTLENDİ!";
+                feedbackMsg.innerHTML = `Yanlış cevap. Doğru cevap <strong>${mission.answer}</strong> olmalıydı.<br><span class="text-xs text-rose-300/80 mt-1 block">${mission.solution}</span>`;
+            }
+
+            // Son görev mi kontrolü
+            if (gameState.currentMissionIndex === missions.length - 1) {
+                nextMissionBtn.textContent = "Fabrika Raporunu Görüntüle";
+            } else {
+                nextMissionBtn.textContent = "Sonraki Göreve Geç";
+            }
+        }
+
+        // Sonraki Görev veya Sonuç Ekranı
+        function nextMission() {
+            gameState.currentMissionIndex++;
+            if (gameState.currentMissionIndex < missions.length) {
+                loadMission();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        // Sonuç Ekranını Göster
+        function showResultScreen() {
+            screenGame.classList.add("hidden");
+            screenResult.classList.remove("hidden");
+
+            document.getElementById("final-score").textContent = gameState.score + " Puan";
+            document.getElementById("final-correct").textContent = `${gameState.correctCount} / ${missions.length}`;
+
+            const gradeEl = document.getElementById("final-grade");
+            const resultBadge = document.getElementById("result-badge");
+            const resultTitle = document.getElementById("result-title");
+            const resultDesc = document.getElementById("result-desc");
+
+            let grade = "C";
+            if (gameState.correctCount >= 9) grade = "A+ (Baş Mühendis)";
+            else if (gameState.correctCount >= 7) grade = "A (Kıdemli Uzman)";
+            else if (gameState.correctCount >= 5) grade = "B (Operatör)";
+            else grade = "C (Stajyer)";
+
+            gradeEl.textContent = grade;
+            resultTitle.textContent = `Tebrikler ${gameState.teamName}!`;
+            resultDesc.innerHTML = `Fabrikanın tüm çarklarını başarıyla test ettiniz. Toplam <strong>${gameState.score} puan</strong> topladınız ve üretim hattını başarıyla tamamladınız.`;
+        }
+
+        // Oyunu Yeniden Başlat
+        function restartGame() {
+            screenResult.classList.add("hidden");
+            screenWelcome.classList.remove("hidden");
+            headerStats.classList.add("hidden");
+            document.getElementById("team-name-input").value = "";
+        }
+
+        // Enter tuşu desteği
+        document.getElementById("team-name-input").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') startGame();
+        });
+
+        userAnswer.addEventListener("keypress", function(e) {
+            if (e.key === 'Enter' && !submitBtn.disabled) submitAnswer();
+        });
+    </script>
+</body>
+</html>
